@@ -66,13 +66,13 @@ int main(int argc, char **argv)
             std::cerr << "[recvfrom]: failed" << std::endl;
             return -1;
         }
-        else //We make sure we only receive one character (and \0)
+        else
         {
             getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
             std::cout << bytes << " bytes received from " << host << ":" << serv << std::endl;
 
-            if (bytes == 2)
+            if (bytes == 2) //We make sure we only receive one character (and \0)
             {
                 time_t rawTime;
                 struct tm *timeInfo;
