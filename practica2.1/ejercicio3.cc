@@ -13,7 +13,8 @@ int main(int argc, char **argv)
     struct addrinfo hints;
     struct addrinfo *result;
 
-    if(argc != 4 || argv[3][1] != '\0'){
+    if (argc != 4 || argv[3][1] != '\0')
+    {
         std::cout << "Usage ./tool <host IP> <port> <1 char command (t/d/q)>" << std::endl;
         return -1;
     }
@@ -40,25 +41,30 @@ int main(int argc, char **argv)
     }
 
     //try to send command to server
-    int bytes = sendto(socketDesc,(void*)argv[3],2,0,result->ai_addr,result->ai_addrlen);
+    int bytes = sendto(socketDesc, (void *)argv[3], 2, 0, result->ai_addr, result->ai_addrlen);
 
-    if(bytes != 2){
+    if (bytes != 2)
+    {
         std::cerr << "[sendto] Command sending failed" << std::endl;
     }
 
-    bytes = recvfrom(socketDesc,buffer,79,0,result->ai_addr,&result->ai_addrlen);
-    
+    if (argv[3][0] != 'q')
+    {
+        //Don't expect answer if quitting
+        bytes = recvfrom(socketDesc, buffer, 79, 0, result->ai_addr, &result->ai_addrlen);
 
-    if(bytes == -1){
-        std::cerr << "[recfrom] Failed retrieving info" << std::endl;
+        if (bytes == -1)
+        {
+            std::cerr << "[recfrom] Failed retrieving info" << std::endl;
+        }
+
+        buffer[79] = '\0'; //Make sure buffer has end
+        buffer[bytes] = '\0';
+
+        std::cout << buffer << std::endl;
     }
 
-    buffer[79] = '\0'; //Make sure buffer has end
-    buffer[bytes] = '\0';
-
-    std::cout << buffer << std::endl;
-
-	freeaddrinfo(result);
+    freeaddrinfo(result);
     close(socketDesc);
 
     return 0;
