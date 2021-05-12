@@ -3,12 +3,14 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <string.h>
+#include <time.h>
 
 #include <iostream>
 
 // ./ej2 <dir escucha> <puerto>
 int main(int argc, char **argv)
 {
+    bool exit = false;
     struct addrinfo hints;
     struct addrinfo *res;
 
@@ -43,34 +45,66 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    while (true)
+    while (!exit)
     {
         char buffer[80];
 
         char host[NI_MAXHOST];
         char serv[NI_MAXSERV];
 
-        struct sockaddr cliente;
-        socklen_t       clientelen = sizeof(struct sockaddr);
+        int sent = 0;
 
-        int bytes = recvfrom(socketDesc,(void *) buffer, 80, 0, &cliente, &clientelen);
+        struct sockaddr cliente;
+        socklen_t clientelen = sizeof(struct sockaddr);
+
+        int bytes = recvfrom(socketDesc, (void *)buffer, 80, 0, &cliente, &clientelen);
 
         if (bytes == -1)
         {
             std::cerr << "[recvfrom]: failed" << std::endl;
             return -1;
         }
+        else if (bytes == 2) //We make sure we only receive one character (and \0)
+        {
+            getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
-        getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+            std::cout << bytes << " bytes received from " << host << ":" << serv << std::endl;
 
-        std::cout << host << " " << host << " " << serv << std::endl;
+            time_t rawTime;
+            struct tm *timeInfo;
+            int msgLen;
 
-        int sent = sendto(socketDesc, buffer, bytes, 0, &cliente, clientelen);
+            time(&rawTime);
+            timeInfo = localtime(&rawTime);
+
+            switch (buffer[0])
+            {
+            case 't':
+                msgLen = strftime(buffer, 80, "%r", timeInfo);
+                sent = sendto(socketDesc, buffer, msgLen, 0, &cliente, clientelen);
+                break;
+            case 'd':
+                msgLen = strftime(buffer, 80, "%F", timeInfo);
+                sent = sendto(socketDesc, buffer, msgLen, 0, &cliente, clientelen);
+                break;
+            case 'q':
+                exit = true;
+                break;
+            default:
+                std::cout << "Unsupported command: " << buffer[0] << std::endl;
+                break;
+            }
+        }
+
+        if (sent == -1)
+        {
+            std::cerr << "[sendto] Error sending information to client" << std::endl;
+        }
     }
 
     close(socketDesc);
 
-    cout << "closing\n" <<  std::endl;
+    std::cout << "Closing..." << std::endl;
 
     return 0;
 }
