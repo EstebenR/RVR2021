@@ -13,72 +13,23 @@ class MessageThread
 
     void do_message()
     {
-        bool exit = false;
-
-        while (!exit)
+        while (true)
         {
-            char buffer[80];
+            int bytes = recv(clientSocket, buffer, 79, 0);
 
-            char host[NI_MAXHOST];
-            char serv[NI_MAXSERV];
-
-            int sent = 0;
-
-            struct sockaddr cliente;
-            socklen_t clientelen = sizeof(struct sockaddr);
-
-            int bytes = recvfrom(socketDesc, (void *)buffer, 79, 0, &cliente, &clientelen);
-
-            buffer[79] = '\0';
-
-            if (bytes == -1)
+            if (bytes <= 0)
             {
-                std::cerr << "[recvfrom]: failed" << std::endl;
-            }
-            else
-            {
-                getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-
-                std::cout << bytes << " bytes received from " << host << ":" << serv
-                <<  " being processed by " << std::this_thread::get_id() << std::endl;
-                sleep(3);
-
-                if (bytes == 2) //We make sure we only receive one character (and \0)
-                {
-                    time_t rawTime;
-                    struct tm *timeInfo;
-                    int msgLen;
-
-                    time(&rawTime);
-                    timeInfo = localtime(&rawTime);
-
-                    switch (buffer[0])
-                    {
-                    case 't':
-                        msgLen = strftime(buffer, 79, "%r", timeInfo);
-                        sent = sendto(socketDesc, buffer, msgLen, 0, &cliente, clientelen);
-                        break;
-                    case 'd':
-                        msgLen = strftime(buffer, 79, "%F", timeInfo);
-                        sent = sendto(socketDesc, buffer, msgLen, 0, &cliente, clientelen);
-                        break;
-                    case 'q':
-                        exit = true;
-                        break;
-                    default:
-                        std::cout << "Unsupported command: " << buffer[0] << std::endl;
-                        break;
-                    }
-                }
+                std::cout << "Connection ended" << std::endl;
+                break;
             }
 
-            if (sent == -1)
-            {
-                std::cerr << "[sendto] Error sending information to client" << std::endl;
-            }
+            buffer[bytes] = '\0';
+
+            send(clientSocket, buffer, bytes, 0);
         }
     }
 
   private:
     int socketDesc;
+    char buffer[80];
 };

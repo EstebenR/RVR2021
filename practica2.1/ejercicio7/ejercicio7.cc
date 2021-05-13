@@ -5,12 +5,13 @@
 #include <string.h>
 
 #include <iostream>
+#include <thread>
+#include "messageThread.cc"
 
-//TCP Echo server
+//TCP Echo server with multithreading
 // ./server <host ip> <port>
 int main(int argc, char **argv)
 {
-
 	struct addrinfo hints;
 	struct addrinfo *res;
 
@@ -53,31 +54,16 @@ int main(int argc, char **argv)
 
 	struct sockaddr cliente;
 	socklen_t clientelen = sizeof(struct sockaddr);
-
-	int clientSocket = accept(socketDesc, &cliente, &clientelen);
-
 	char host[NI_MAXHOST];
 	char serv[NI_MAXSERV];
 
-	getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-
-	std::cout << "Incoming connection from " << host << " " << serv << std::endl;
-
 	while (true)
 	{
-		char buffer[80];
+		int clientSocket = accept(socketDesc, &cliente, &clientelen);
 
-		int bytes = recv(clientSocket, buffer, 79, 0);
+		getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
-		if (bytes <= 0)
-		{
-			std::cout << "Connection ended" << std::endl;
-			break;
-		}
-
-		buffer[bytes] = '\0';
-
-		send(clientSocket,buffer,bytes,0);
+		std::cout << "Incoming connection from " << host << " " << serv << std::endl;
 	}
 
 	return 0;
