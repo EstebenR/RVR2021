@@ -13,9 +13,7 @@ class MessageThread
 
     void do_message()
     {
-        bool exit = false;
-
-        while (!exit)
+        while (true)
         {
             int sent = 0;
 
@@ -57,9 +55,7 @@ class MessageThread
                         msgLen = strftime(buffer, 79, "%F", timeInfo);
                         sent = sendto(socketDesc, buffer, msgLen, 0, &cliente, clientelen);
                         break;
-                    case 'q':
-                        exit = true;
-                        break;
+                    case 'q': //Now the server handles closing
                     default:
                         std::cout << "Unsupported command: " << buffer[0] << std::endl;
                         break;
