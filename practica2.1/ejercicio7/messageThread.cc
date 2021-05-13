@@ -15,7 +15,7 @@ class MessageThread
     {
         while (true)
         {
-            int bytes = recv(clientSocket, buffer, 79, 0);
+            int bytes = recv(socketDesc, buffer, 79, 0);
 
             if (bytes <= 0)
             {
@@ -25,8 +25,9 @@ class MessageThread
 
             buffer[bytes] = '\0';
 
-            send(clientSocket, buffer, bytes, 0);
+            send(socketDesc, buffer, bytes, 0);
         }
+        close(socketDesc);
     }
 
   private:

@@ -64,6 +64,13 @@ int main(int argc, char **argv)
 		getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
 		std::cout << "Incoming connection from " << host << " " << serv << std::endl;
+
+		MessageThread* mt = new MessageThread(clientSocket);
+		std::thread([&mt](){
+			mt->do_message();
+
+			delete mt;
+		}).detach();
 	}
 
 	return 0;

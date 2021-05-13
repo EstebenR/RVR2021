@@ -80,5 +80,8 @@ int main(int argc, char **argv)
 		send(clientSocket,buffer,bytes,0);
 	}
 
+	close(clientSocket);
+	close(socketDesc);
+
 	return 0;
 }
