@@ -5,7 +5,7 @@
 #include <string.h>
 #include <thread>
 
-//UDP message thread
+//TCP message thread
 class MessageThread
 {
   public:
