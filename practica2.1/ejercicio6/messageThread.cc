@@ -17,11 +17,6 @@ class MessageThread
 
         while (!exit)
         {
-            char buffer[80];
-
-            char host[NI_MAXHOST];
-            char serv[NI_MAXSERV];
-
             int sent = 0;
 
             struct sockaddr cliente;
@@ -40,7 +35,7 @@ class MessageThread
                 getnameinfo(&cliente, clientelen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
                 std::cout << bytes << " bytes received from " << host << ":" << serv
-                <<  " being processed by " << std::this_thread::get_id() << std::endl;
+                          << " being processed by " << std::this_thread::get_id() << std::endl;
                 sleep(3);
 
                 if (bytes == 2) //We make sure we only receive one character (and \0)
@@ -81,4 +76,8 @@ class MessageThread
 
   private:
     int socketDesc;
+    char buffer[80];
+
+    char host[NI_MAXHOST];
+    char serv[NI_MAXSERV];
 };
