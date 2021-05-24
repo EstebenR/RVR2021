@@ -78,16 +78,22 @@ void ChatServer::do_messages()
 		case 0:
 			//Login
 			clients.push_back(std::move(clientSock));
+			std::cout << "User " << msg.nick << " logged in" << std::endl;
 			break;
 		case 1:
 			//Message
 			for (auto it = clients.begin(); it != clients.end(); it++)
 			{
 				if (!(**it == *clientSock))
+				{
+					//std::cout << "Sent to client " << **it << std::endl;
 					socket.send(msg, **it);
+				}
 			}
+			//std::cout << "Message " << msg.message << " sent to clients" << std::endl;
 			break;
 		case 2:
+		{
 			//Logout
 			bool found = false;
 			auto it = clients.begin();
@@ -103,7 +109,9 @@ void ChatServer::do_messages()
 					it++;
 				}
 			}
+			std::cout << "User " << msg.nick << " disconnected" << std::endl;
 			break;
+		}
 		default:
 			break;
 		}
@@ -126,6 +134,12 @@ void ChatClient::login()
 void ChatClient::logout()
 {
 	// Completar
+	std::string msg;
+
+	ChatMessage em(nick, msg);
+	em.type = ChatMessage::LOGOUT;
+
+	socket.send(em, socket);
 }
 
 void ChatClient::input_thread()
@@ -134,6 +148,14 @@ void ChatClient::input_thread()
 	{
 		// Leer stdin con std::getline
 		// Enviar al servidor usando socket
+		std::string msg;
+		std::getline(std::cin, msg);
+
+		ChatMessage cmsg(nick, msg);
+		cmsg.type = ChatMessage::MESSAGE;
+
+		socket.send(cmsg, socket);
+		std::cout << "Message '"<< cmsg.message << "' sent" << std::endl;
 	}
 }
 
@@ -143,5 +165,8 @@ void ChatClient::net_thread()
 	{
 		//Recibir Mensajes de red
 		//Mostrar en pantalla el mensaje de la forma "nick: mensaje"
+		ChatMessage msg;
+		socket.recv(msg);
+		std::cout << msg.nick << ": " << msg.message << std::endl;
 	}
 }

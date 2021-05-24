@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-g -I.
+CFLAGS=-g -std=c++11 -I.
 DEPS = Socket.h Chat.h
 OBJ = Socket.o Chat.o
 LIBS=-lpthread
