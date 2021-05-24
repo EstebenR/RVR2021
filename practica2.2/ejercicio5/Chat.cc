@@ -81,6 +81,11 @@ void ChatServer::do_messages()
 			break;
 		case 1:
 			//Message
+			for (auto it = clients.begin(); it != clients.end(); it++)
+			{
+				if (!(**it == *clientSock))
+					socket.send(msg, **it);
+			}
 			break;
 		case 2:
 			//Logout
