@@ -33,6 +33,7 @@ Socket::Socket(const char *address, const char *port) : sd(-1)
 }
 
 Socket::Socket(struct sockaddr * _sa, socklen_t _sa_len) : sd(-1), sa(*_sa),sa_len(_sa_len){
+	//Creamos el constructor para poder enviar mensajes a los clientes
 	sd = socket(AF_INET,SOCK_DGRAM,0);
 	bind();
 };
@@ -66,7 +67,6 @@ int Socket::send(Serializable &obj, const Socket &sock)
 	obj.to_bin();
 	//Enviar el objeto binario a sock usando el socket sd
 	int sent = sendto(sock.sd, obj.data(), obj.size(), 0, &sock.sa, sock.sa_len);
-	std::cout << "Sent to " << sock.sd << std::endl;
 }
 
 bool operator==(const Socket &s1, const Socket &s2)

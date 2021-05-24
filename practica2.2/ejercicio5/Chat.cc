@@ -38,11 +38,13 @@ int ChatMessage::from_bin(char *bobj)
 	tmp += sizeof(uint8_t);
 
 	//Nick
-	nick = std::string(tmp, tmp + 8 * sizeof(char));
+	nick = tmp; //Esto se puede hacer porque sabemos que enviamos un null-terminated char array
+	//nick = std::string(tmp, tmp + 8 * sizeof(char));
 	tmp += 8 * sizeof(char);
 
 	//Message
-	message = std::string(tmp, tmp + 80 * sizeof(char));
+	//message = std::string(tmp, tmp + 80 * sizeof(char));
+	message = tmp;
 	tmp += 80 * sizeof(char);
 
 	return 0;
