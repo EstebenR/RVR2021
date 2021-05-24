@@ -38,13 +38,12 @@ int ChatMessage::from_bin(char *bobj)
 	tmp += sizeof(uint8_t);
 
 	//Nick
-	nick = std::string(tmp,tmp+8*sizeof(char));
+	nick = std::string(tmp, tmp + 8 * sizeof(char));
 	tmp += 8 * sizeof(char);
 
 	//Message
-	message = std::string(tmp,tmp+80*sizeof(char));
+	message = std::string(tmp, tmp + 80 * sizeof(char));
 	tmp += 80 * sizeof(char);
-
 
 	return 0;
 }
@@ -62,10 +61,47 @@ void ChatServer::do_messages()
          * para añadirlo al vector
          */
 
+		ChatMessage msg;
+		Socket *client = &socket; //el valor usado aqui no importa, será sobreescrito en recv
+		socket.recv(msg, client);
+
+		//Make unique
+		std::unique_ptr<Socket> clientSock(client);
+
 		//Recibir Mensajes en y en función del tipo de mensaje
 		// - LOGIN: Añadir al vector clients
 		// - LOGOUT: Eliminar del vector clients
 		// - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
+
+		switch (msg.type)
+		{
+		case 0:
+			//Login
+			clients.push_back(std::move(clientSock));
+			break;
+		case 1:
+			//Message
+			break;
+		case 2:
+			//Logout
+			bool found = false;
+			auto it = clients.begin();
+			while (!found && it != clients.end())
+			{
+				if (**it == *clientSock)
+				{
+					it = clients.erase(it);
+					found = true;
+				}
+				else
+				{
+					it++;
+				}
+			}
+			break;
+		default:
+			break;
+		}
 	}
 }
 
